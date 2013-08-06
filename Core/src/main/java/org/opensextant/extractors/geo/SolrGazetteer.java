@@ -68,7 +68,7 @@ public class SolrGazetteer {
      * SolrMatcher
      */
     private ModifiableSolrParams params = new ModifiableSolrParams();
-    private SolrProxy solr = null;
+    private static SolrProxy solr = null;
     private Map<String, Country> country_lookup = null;
     private Map<String, String> iso2fips = new HashMap<String, String>();
     private Map<String, String> fips2iso = new HashMap<String, String>();
@@ -83,6 +83,15 @@ public class SolrGazetteer {
      */
     public SolrGazetteer() throws IOException {
         initialize();
+    }
+
+    /**
+     * Close solr resources.
+     */
+    public static void shutdown() {
+        if (solr != null) {
+            solr.close();
+        }
     }
     private Map<String, String> _default_country_names = new HashMap<String, String>();
 
@@ -331,42 +340,5 @@ public class SolrGazetteer {
         }
 
         return places;
-    }
-
-    /**
-     * Do a basic test
-     */
-    public static void main(String[] args) throws Exception {
-        //String solrHome = args[0];
-        String OPENSEXTANT_HOME = System.getProperty("opensextant.home");
-        String SOLR_HOME = OPENSEXTANT_HOME + File.separator + ".." + File.separator + "opensextant-solr";
-        System.setProperty("solr.solr.home", SOLR_HOME);
-
-
-        SolrGazetteer gaz = new SolrGazetteer();
-
-        try {
-
-            // Try to get countries
-            Map<String, Country> countries = gaz.getCountries();
-            for (Country c : countries.values()) {
-                System.out.println(c.getKey() + " = " + c.name + "\t  Aliases: " + c.getAliases().toString());
-            }
-
-
-            List<Place> matches = gaz.search("+Boston +City");
-
-            for (Place pc : matches) {
-                System.out.println(pc.toString() + " which is categorized as: " + gaz.getFeatureName(pc.getFeatureClass(), pc.getFeatureCode()));
-            }
-
-
-
-        } catch (Exception err) {
-            err.printStackTrace();
-        }
-        gaz.solr.close();
-        System.exit(0);
-
     }
 }
