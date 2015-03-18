@@ -233,9 +233,14 @@ public class SolrProxy extends SolrUtil {
     public static List<Place> searchGazetteer(SolrClient index, SolrParams qparams)
             throws SolrServerException {
 
-        QueryResponse response = index.query(qparams, SolrRequest.METHOD.GET);
+      QueryResponse response = null;
+      try {
+        response = index.query(qparams, SolrRequest.METHOD.GET);
+      } catch (IOException e) {
+        throw new SolrServerException(e);
+      }
 
-        List<Place> places = new ArrayList<>();
+      List<Place> places = new ArrayList<>();
         SolrDocumentList docList = response.getResults();
 
         for (SolrDocument solrDoc : docList) {
